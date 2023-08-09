@@ -1,17 +1,20 @@
 pipeline {
     agent any
     
-    environment {
-        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials-8e6477b9-8b07-418a-baad-31c64efa8352')
-    }
-    
     stages {
         stage('Blue Deployment') {
             steps {
                 script {
+                    // Pull and run blue Docker image
                     docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-credentials-8e6477b9-8b07-418a-baad-31c64efa8352') {
-                        docker.image('bluedeploy:latest').pull()
-                        docker.image('bluedeploy:latest').run('-p 8080:80 -d')
+                        def blueImage = docker.image('blue-image:latest')
+                        blueImage.pull()
+                        blueImage.run('-p 8081:80 -d')
+                    }
+
+                    // Run update_nginx.sh script to switch to blue
+                    sshagent(credentials: ['ssh-key-credentials-SSH_KEY']) {
+                        sh "ssh ec2-user@172-31-12-201 './update_nginx.sh blue'"
                     }
                 }
             }
@@ -20,9 +23,16 @@ pipeline {
         stage('Green Deployment') {
             steps {
                 script {
+                    // Pull and run green Docker image
                     docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-credentials-8e6477b9-8b07-418a-baad-31c64efa8352') {
-                        docker.image('greendeploy:latest').pull()
-                        docker.image('greendeploy:latest').run('-p 8081:80 -d')
+                        def greenImage = docker.image('green-image:latest')
+                        greenImage.pull()
+                        greenImage.run('-p 8082:80 -d')
+                    }
+
+                    // Run update_nginx.sh script to switch to green
+                    sshagent(credentials: ['ssh-key-credentials-SSH_KEY']) {
+                        sh "ssh ec2-user@172-31-12-201 './update_nginx.sh green'"
                     }
                 }
             }
