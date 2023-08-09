@@ -1,0 +1,23 @@
+pipeline {
+    agent any
+    
+    stages {
+        stage('Green Deployment') {
+            steps {
+                script {
+                    docker.image('greendeploy:latest').pull()
+                    docker.image('greendeploy:latest').run('-p 8080:80 -d')
+                }
+            }
+        }
+
+        stage('Blue Deployment') {
+            steps {
+                script {
+                    docker.image('bluedeploy:latest').pull()
+                    docker.image('bluedeploy:latest').run('-p 8081:80 -d')
+                }
+            }
+        }
+    }
+}
