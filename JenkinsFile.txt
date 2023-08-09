@@ -1,23 +1,32 @@
 pipeline {
     agent any
     
+    environment {
+        DOCKER_HUB_CREDENTIALS = credentials('docker-hub-credentials-8e6477b9-8b07-418a-baad-31c64efa8352')
+    }
+    
     stages {
-        stage('Green Deployment') {
+        stage('Blue Deployment') {
             steps {
                 script {
-                    docker.image('greendeploy:latest').pull()
-                    docker.image('greendeploy:latest').run('-p 8080:80 -d')
+                    docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-credentials-8e6477b9-8b07-418a-baad-31c64efa8352') {
+                        docker.image('bluedeploy:latest').pull()
+                        docker.image('bluedeploy:latest').run('-p 8080:80 -d')
+                    }
                 }
             }
         }
 
-        stage('Blue Deployment') {
+        stage('Green Deployment') {
             steps {
                 script {
-                    docker.image('bluedeploy:latest').pull()
-                    docker.image('bluedeploy:latest').run('-p 8081:80 -d')
+                    docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-credentials-8e6477b9-8b07-418a-baad-31c64efa8352') {
+                        docker.image('greendeploy:latest').pull()
+                        docker.image('greendeploy:latest').run('-p 8081:80 -d')
+                    }
                 }
             }
         }
     }
 }
+
