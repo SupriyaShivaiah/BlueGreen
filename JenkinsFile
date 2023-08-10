@@ -9,7 +9,7 @@ pipeline {
                     docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-credentials-id') {
                         def blueImage = docker.image('supriyashivaiah/blue-app:v1')
                         blueImage.pull()
-                        blueImage.run('-p 8081:80 -d')
+                        blueImage.run('-p 8083:80 -d')
                     }
 
                     // Run update_nginx.sh script to switch to blue
