@@ -7,7 +7,7 @@ pipeline {
                 script {
                     // Pull and run blue Docker image
                     docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-credentials-id') {
-                        def blueImage = docker.image('blue-image:latest')
+                        def blueImage = docker.image('blue-server:')
                         blueImage.pull()
                         blueImage.run('-p 8081:80 -d')
                     }
@@ -25,7 +25,7 @@ pipeline {
                 script {
                     // Pull and run green Docker image
                     docker.withRegistry('https://index.docker.io/v1/', 'docker-hub-credentials-id') {
-                        def greenImage = docker.image('green-image:latest')
+                        def greenImage = docker.image('green-server:green')
                         greenImage.pull()
                         greenImage.run('-p 8082:80 -d')
                     }
